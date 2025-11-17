@@ -2,6 +2,4 @@
 
 :heavy_check_mark:_(COMMENT) Add a description of the architecture of your application and create a diagram like the one below. Link to the diagram in this document._
 
-![eShopOnContainers Architecture](https://docs.microsoft.com/en-us/dotnet/architecture/cloud-native/media/eshoponcontainers-development-architecture.png)
-
-[Source](https://docs.microsoft.com/en-us/dotnet/architecture/cloud-native/introduce-eshoponcontainers-reference-app)
+<img width="1020" height="689" alt="image" src="https://github.com/user-attachments/assets/d072db8f-9380-4da5-92bd-cb3e400a013c" />
