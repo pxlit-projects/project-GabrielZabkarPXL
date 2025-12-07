@@ -1,1 +1,20 @@
-# This file will contain a script in orde to start up the system (all microservices) 
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: postservice-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: post_service_db
+      MYSQL_USER: postuser
+      MYSQL_PASSWORD: postpass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql_data:
