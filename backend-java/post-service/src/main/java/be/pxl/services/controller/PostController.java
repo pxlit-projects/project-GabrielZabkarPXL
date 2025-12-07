@@ -134,17 +134,13 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Post post = postService.getPostById(id);
-
-        if (post.getStatus() != PostStatus.DRAFT) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(null);
+        try {
+            Post updated = postService.submitForReview(id);
+            log.info("Post id={} submitted for review (status REQUESTED + event)", id);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-
-        Post updated = postService.updateStatus(id, PostStatus.REQUESTED);
-        log.info("Post id={} submitted for review", id);
-
-        return ResponseEntity.ok(updated);
     }
 
     @GetMapping("/requested")

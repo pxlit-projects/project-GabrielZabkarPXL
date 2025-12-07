@@ -1,10 +1,13 @@
 package be.pxl.services.service;
 
+import be.pxl.services.dto.PostReviewRequestedEvent;
 import be.pxl.services.entity.Post;
 import be.pxl.services.entity.PostStatus;
 import be.pxl.services.repository.PostRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,9 +20,18 @@ public class PostService {
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
     private final PostRepository postRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public PostService(PostRepository postRepository) {
+    @Value("${app.rabbitmq.exchange}")
+    private String exchangeName;
+
+    @Value("${app.rabbitmq.review-request-routing-key}")
+    private String reviewRequestRoutingKey;
+
+    public PostService(PostRepository postRepository,
+                       RabbitTemplate rabbitTemplate) {
         this.postRepository = postRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public Post createPost(Post post) {
@@ -112,6 +124,29 @@ public class PostService {
         existing.setStatus(newStatus);
         Post saved = postRepository.save(existing);
         log.info("Post {} status changed to {}", saved.getId(), saved.getStatus());
+        return saved;
+    }
+
+    public Post submitForReview(Long id) {
+        Post post = getPostById(id);
+
+        if (post.getStatus() != PostStatus.DRAFT) {
+            throw new IllegalStateException("Post kan enkel vanuit DRAFT ingediend worden.");
+        }
+
+        post.setStatus(PostStatus.REQUESTED);
+        Post saved = postRepository.save(post);
+
+        PostReviewRequestedEvent event = new PostReviewRequestedEvent(
+                saved.getId(),
+                saved.getTitle(),
+                saved.getContent(),
+                saved.getAuthor()
+        );
+
+        log.info("Sending review request event for post {}", saved.getId());
+        rabbitTemplate.convertAndSend(exchangeName, reviewRequestRoutingKey, event);
+
         return saved;
     }
 }

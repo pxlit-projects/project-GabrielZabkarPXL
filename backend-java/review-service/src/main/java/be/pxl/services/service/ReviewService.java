@@ -2,8 +2,10 @@ package be.pxl.services.service;
 
 import be.pxl.services.client.PostClient;
 import be.pxl.services.dto.PostDTO;
+import be.pxl.services.dto.PostReviewResultEvent;
 import be.pxl.services.entity.Review;
 import be.pxl.services.entity.ReviewDecision;
+import be.pxl.services.messaging.ReviewResultPublisher;
 import be.pxl.services.repository.ReviewRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +21,14 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final PostClient postClient;
+    private final ReviewResultPublisher reviewResultPublisher;   // <-- nieuw
 
-    public ReviewService(ReviewRepository reviewRepository, PostClient postClient) {
+    public ReviewService(ReviewRepository reviewRepository,
+                         PostClient postClient,
+                         ReviewResultPublisher reviewResultPublisher) {
         this.reviewRepository = reviewRepository;
         this.postClient = postClient;
+        this.reviewResultPublisher = reviewResultPublisher;
     }
 
     public Review reviewPost(Long postId, String reviewer,
@@ -41,9 +47,16 @@ public class ReviewService {
         String newStatus = (decision == ReviewDecision.APPROVED)
                 ? "PUBLISHED"
                 : "REJECTED";
-
         postClient.updatePostStatus(postId, newStatus);
         log.info("Post {} reviewed as {}", postId, newStatus);
+
+        PostReviewResultEvent event = new PostReviewResultEvent(
+                postId,
+                decision,
+                reviewer,
+                comment
+        );
+        reviewResultPublisher.publish(event);
 
         return saved;
     }
