@@ -1,5 +1,6 @@
 package be.pxl.services.service;
 
+import be.pxl.services.dto.PostDTO;
 import be.pxl.services.dto.PostReviewRequestedEvent;
 import be.pxl.services.entity.Post;
 import be.pxl.services.entity.PostStatus;
@@ -148,5 +149,13 @@ public class PostService {
         rabbitTemplate.convertAndSend(exchangeName, reviewRequestRoutingKey, event);
 
         return saved;
+    }
+
+    public List<PostDTO> getReviewNotifications(String editor) {
+        return postRepository
+                .findByAuthorAndLastReviewDecisionIsNotNullOrderByLastReviewedAtDesc(editor)
+                .stream()
+                .map(PostDTO::new)
+                .toList();
     }
 }

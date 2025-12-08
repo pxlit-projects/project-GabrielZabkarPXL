@@ -29,4 +29,11 @@ public class Post {
 
     @Enumerated(EnumType.STRING)
     private PostStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private ReviewDecision lastReviewDecision;
+
+    private String lastReviewComment;
+    private String lastReviewReviewer;
+    private LocalDateTime lastReviewedAt;
 }

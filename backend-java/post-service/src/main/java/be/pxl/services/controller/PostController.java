@@ -1,5 +1,6 @@
 package be.pxl.services.controller;
 
+import be.pxl.services.dto.PostDTO;
 import be.pxl.services.entity.Post;
 import be.pxl.services.entity.PostStatus;
 import be.pxl.services.service.PostService;
@@ -174,4 +175,10 @@ public class PostController {
         Post post = postService.getPostById(id);
         return ResponseEntity.ok(post);
     }
+
+    @GetMapping("/notifications")
+    public List<PostDTO> getReviewNotifications(@RequestParam String editor) {
+        return postService.getReviewNotifications(editor);
+    }
+
 }
