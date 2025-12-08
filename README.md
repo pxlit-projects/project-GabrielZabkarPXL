@@ -1,6 +1,6 @@
 # Fullstack Java Project
 
-## Firstname Lastname (Class)
+## Gabriël Zabkar
 Change the name and Class in the title above
 
 ## Folder structure
